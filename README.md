@@ -66,25 +66,3 @@ If you'd like to contribute to this project, feel free to fork the repository, c
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
-
-### Step 2: Push the README to GitHub
-
-Once you've added the `README.md` to your local repository:
-
-1. **Stage the changes**:
-   ```bash
-   git add README.md
-   ```
-
-2. **Commit the changes**:
-   ```bash
-   git commit -m "Add README.md"
-   ```
-
-3. **Push to the remote repository**:
-   ```bash
-   git push origin main
-   ```
-
-Now, your repository will have a clear and informative README. You can adjust the content based on your project’s specifics! Let me know if you'd like to add anything else.
