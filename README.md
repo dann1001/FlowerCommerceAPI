@@ -1,15 +1,3 @@
-Sure! Here’s a basic `README.md` template for your `FlowerCommerceAPI` project that you can use to explain your project and its setup:
-
-### Step 1: Create a README file
-
-1. In your project directory, create a `README.md` file:
-   ```bash
-   touch README.md
-   ```
-
-2. Open the `README.md` file and add the following content:
-
-### README.md Template:
 
 ```markdown
 # FlowerCommerceAPI
