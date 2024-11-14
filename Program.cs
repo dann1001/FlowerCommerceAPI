@@ -1,19 +1,44 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using FlowerCommerceAPI.Data; // Make sure to include this
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using FlowerCommerceAPI.Data;
+using FlowerCommerceAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configure the DbContext with SQL Server and connection string from appsettings.json
-builder.Services.AddDbContext<AppDbContext>(options => 
+builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// Add controllers (required for API controllers)
-builder.Services.AddControllers();
+// Add JWT Authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
+    };
+});
+
+// Add JwtService for handling token generation
+builder.Services.AddScoped<JwtService>();
 
 var app = builder.Build();
 
@@ -26,6 +51,10 @@ if (app.Environment.IsDevelopment())
 
 // Remove or comment out the HTTPS redirection
 // app.UseHttpsRedirection();
+
+// Enable Authentication and Authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Define a simple route for the root path
 app.MapGet("/", () => Results.Content("Welcome to the Flower Commerce API!"));

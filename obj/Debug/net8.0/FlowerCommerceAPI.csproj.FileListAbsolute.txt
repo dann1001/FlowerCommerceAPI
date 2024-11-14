@@ -142,3 +142,4 @@ C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\refint\FlowerCommerce
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.pdb
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.genruntimeconfig.cache
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\ref\FlowerCommerceAPI.dll
+C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.sourcelink.json
