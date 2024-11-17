@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using FlowerCommerceAPI.Services;
 using FlowerCommerceAPI.Models;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FlowerCommerceAPI.Controllers
 {
@@ -11,18 +11,35 @@ namespace FlowerCommerceAPI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly JwtService _jwtService;
+        private readonly PasswordService _passwordService;
+        private static List<User> Users = new List<User>();
 
-        // For demo purposes, replace with database in production
-        private static List<User> Users = new List<User>
-        {
-            new User { Id = 1, Username = "admin", PasswordHash = HashPassword("admin123"), Role = "Admin" }
-        };
-
-        public AuthController(JwtService jwtService)
+        public AuthController(JwtService jwtService, PasswordService passwordService)
         {
             _jwtService = jwtService;
+            _passwordService = passwordService;
         }
 
+        // 1. User Registration
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] User user)
+        {
+            if (Users.Exists(u => u.Email == user.Email))
+            {
+                return Conflict("Email is already in use.");
+            }
+
+            // Hash password and store in the PasswordHash field
+            user.PasswordHash = _passwordService.HashPassword(user, user.PasswordHash);
+            user.Role = "User"; // Default role for new users
+            Users.Add(user);
+
+            return Ok("Registration successful");
+        }
+
+        // 2. User Login
+        [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult Login([FromBody] User user)
         {
@@ -35,7 +52,7 @@ namespace FlowerCommerceAPI.Controllers
             var existingUser = Users.Find(u => u.Username == user.Username);
 
             // Verify password using PasswordHash
-            if (existingUser == null || !VerifyPassword(user.PasswordHash, existingUser.PasswordHash))
+            if (existingUser == null || !_passwordService.VerifyPassword(existingUser, user.PasswordHash))
             {
                 return Unauthorized("Invalid username or password");
             }
@@ -44,45 +61,17 @@ namespace FlowerCommerceAPI.Controllers
             return Ok(new { Token = token });
         }
 
-        // Hash password (for storage)
-        private static string HashPassword(string password)
+        // 3. Password Reset Flow
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public IActionResult ResetPassword(string email, string newPassword)
         {
-            byte[] salt = new byte[128 / 8];
-            using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
-            {
-                rng.GetBytes(salt);
-            }
+            var user = Users.Find(u => u.Email == email);
+            if (user == null) return NotFound("User not found");
 
-            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: password,
-                salt: salt,
-                prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 10000,
-                numBytesRequested: 256 / 8));
-
-            return $"{Convert.ToBase64String(salt)}:{hashed}";
-        }
-
-        // Verify password (during login)
-        private static bool VerifyPassword(string enteredPassword, string storedPasswordHash)
-        {
-            var parts = storedPasswordHash.Split(':');
-            if (parts.Length != 2)
-            {
-                return false;
-            }
-
-            var salt = Convert.FromBase64String(parts[0]);
-            var storedHash = parts[1];
-
-            string enteredHash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                password: enteredPassword,
-                salt: salt,
-                prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 10000,
-                numBytesRequested: 256 / 8));
-
-            return storedHash == enteredHash;
+            // Reset password and hash the new password
+            user.PasswordHash = _passwordService.HashPassword(user, newPassword);
+            return Ok("Password reset successfully");
         }
     }
 }

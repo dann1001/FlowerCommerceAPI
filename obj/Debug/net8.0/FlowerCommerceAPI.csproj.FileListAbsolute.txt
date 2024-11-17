@@ -128,6 +128,7 @@ C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.Ass
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.csproj.CoreCompileInputs.cache
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.sourcelink.json
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\staticwebassets\msbuild.FlowerCommerceAPI.Microsoft.AspNetCore.StaticWebAssets.props
@@ -142,4 +143,3 @@ C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\refint\FlowerCommerce
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.pdb
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.genruntimeconfig.cache
 C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\ref\FlowerCommerceAPI.dll
-C:\Users\Danial\Desktop\FlowerCommerceAPI\obj\Debug\net8.0\FlowerCommerceAPI.sourcelink.json

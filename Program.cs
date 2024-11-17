@@ -40,6 +40,9 @@ builder.Services.AddAuthentication(options =>
 
 // Add JwtService for handling token generation
 builder.Services.AddScoped<JwtService>();
+// Register PasswordService for dependency injection
+builder.Services.AddScoped<PasswordService>();
+
 
 var app = builder.Build();
 
@@ -51,7 +54,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Remove or comment out the HTTPS redirection
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 // Enable Authentication and Authorization
 app.UseAuthentication();
