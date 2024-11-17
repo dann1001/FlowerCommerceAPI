@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using FlowerCommerceAPI.Services;
 using FlowerCommerceAPI.Models;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation; // For password hashing
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace FlowerCommerceAPI.Controllers
 {
@@ -11,9 +11,11 @@ namespace FlowerCommerceAPI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly JwtService _jwtService;
-        private static List<User> Users = new List<User> // For demo purposes, replace with database in production
+
+        // For demo purposes, replace with database in production
+        private static List<User> Users = new List<User>
         {
-            new User { Id = 1, Username = "admin", Password = HashPassword("admin123"), Role = "Admin" }
+            new User { Id = 1, Username = "admin", PasswordHash = HashPassword("admin123"), Role = "Admin" }
         };
 
         public AuthController(JwtService jwtService)
@@ -24,14 +26,16 @@ namespace FlowerCommerceAPI.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] User user)
         {
-            if (user == null || string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password))
+            if (user == null || string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.PasswordHash))
             {
                 return BadRequest("Username and Password are required.");
             }
 
+            // Find user by username
             var existingUser = Users.Find(u => u.Username == user.Username);
-            
-            if (existingUser == null || !VerifyPassword(user.Password, existingUser.Password))
+
+            // Verify password using PasswordHash
+            if (existingUser == null || !VerifyPassword(user.PasswordHash, existingUser.PasswordHash))
             {
                 return Unauthorized("Invalid username or password");
             }
@@ -43,7 +47,6 @@ namespace FlowerCommerceAPI.Controllers
         // Hash password (for storage)
         private static string HashPassword(string password)
         {
-            // Salt and hash the password
             byte[] salt = new byte[128 / 8];
             using (var rng = new System.Security.Cryptography.RNGCryptoServiceProvider())
             {
@@ -61,9 +64,14 @@ namespace FlowerCommerceAPI.Controllers
         }
 
         // Verify password (during login)
-        private static bool VerifyPassword(string enteredPassword, string storedPassword)
+        private static bool VerifyPassword(string enteredPassword, string storedPasswordHash)
         {
-            var parts = storedPassword.Split(':');
+            var parts = storedPasswordHash.Split(':');
+            if (parts.Length != 2)
+            {
+                return false;
+            }
+
             var salt = Convert.FromBase64String(parts[0]);
             var storedHash = parts[1];
 
