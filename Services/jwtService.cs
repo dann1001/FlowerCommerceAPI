@@ -12,6 +12,8 @@ namespace FlowerCommerceAPI.Services
         private readonly string _secretKey;
         private readonly string _issuer;
         private readonly string _audience;
+        private const int TokenLifetime = 30; // Default to 30 minutes for regular sessions
+        private const int RememberMeLifetime = 1440; // 1 day for "Remember Me"
 
         public JwtService(IConfiguration configuration)
         {
@@ -26,8 +28,9 @@ namespace FlowerCommerceAPI.Services
         /// </summary>
         /// <param name="username">The username of the user.</param>
         /// <param name="role">The role of the user.</param>
+        /// <param name="rememberMe">Whether to extend the token's expiration time.</param>
         /// <returns>A JWT token as a string.</returns>
-        public string GenerateToken(string username, string role)
+        public string GenerateToken(string username, string role, bool rememberMe = false)
         {
             if (string.IsNullOrEmpty(username))
                 throw new ArgumentException("Username cannot be null or empty.", nameof(username));
@@ -40,8 +43,12 @@ namespace FlowerCommerceAPI.Services
             {
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Role, role),
+                new Claim(JwtRegisteredClaimNames.Sub, username), // Add subject claim for username
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // Unique identifier for the token
             };
+
+            // Determine the expiration time based on "rememberMe" flag
+            var expires = DateTime.UtcNow.AddMinutes(rememberMe ? RememberMeLifetime : TokenLifetime);
 
             // Generate a security key
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
@@ -52,7 +59,7 @@ namespace FlowerCommerceAPI.Services
                 issuer: _issuer,
                 audience: _audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(60), // Token expiration time
+                expires: expires, // Set expiration time
                 signingCredentials: creds
             );
 
