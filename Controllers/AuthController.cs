@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using FlowerCommerceAPI.Services;
 using FlowerCommerceAPI.Models;
-using System.Collections.Generic;
+using FlowerCommerceAPI.Data;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace FlowerCommerceAPI.Controllers
 {
@@ -10,12 +11,13 @@ namespace FlowerCommerceAPI.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
+        private readonly AppDbContext _dbContext;
         private readonly JwtService _jwtService;
         private readonly PasswordService _passwordService;
-        private static List<User> Users = new List<User>();
 
-        public AuthController(JwtService jwtService, PasswordService passwordService)
+        public AuthController(AppDbContext dbContext, JwtService jwtService, PasswordService passwordService)
         {
+            _dbContext = dbContext;
             _jwtService = jwtService;
             _passwordService = passwordService;
         }
@@ -25,15 +27,18 @@ namespace FlowerCommerceAPI.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] User user)
         {
-            if (Users.Exists(u => u.Email == user.Email))
+            if (_dbContext.Users.Any(u => u.Email == user.Email))
             {
                 return Conflict("Email is already in use.");
             }
 
-            // Hash password and store in the PasswordHash field
+            // Hash the password
             user.PasswordHash = _passwordService.HashPassword(user, user.PasswordHash);
             user.Role = "User"; // Default role for new users
-            Users.Add(user);
+
+            // Save to database
+            _dbContext.Users.Add(user);
+            _dbContext.SaveChanges();
 
             return Ok("Registration successful");
         }
@@ -49,14 +54,15 @@ namespace FlowerCommerceAPI.Controllers
             }
 
             // Find user by username
-            var existingUser = Users.Find(u => u.Username == user.Username);
+            var existingUser = _dbContext.Users.FirstOrDefault(u => u.Username == user.Username);
 
-            // Verify password using PasswordHash
+            // Verify password
             if (existingUser == null || !_passwordService.VerifyPassword(existingUser, user.PasswordHash))
             {
                 return Unauthorized("Invalid username or password");
             }
 
+            // Generate JWT token
             var token = _jwtService.GenerateToken(existingUser.Username, existingUser.Role);
             return Ok(new { Token = token });
         }
@@ -66,11 +72,14 @@ namespace FlowerCommerceAPI.Controllers
         [HttpPost("reset-password")]
         public IActionResult ResetPassword(string email, string newPassword)
         {
-            var user = Users.Find(u => u.Email == email);
-            if (user == null) return NotFound("User not found");
+            var user = _dbContext.Users.FirstOrDefault(u => u.Email == email);
+            if (user == null)
+                return NotFound("User not found");
 
-            // Reset password and hash the new password
+            // Reset password and hash the new one
             user.PasswordHash = _passwordService.HashPassword(user, newPassword);
+            _dbContext.SaveChanges();
+
             return Ok("Password reset successfully");
         }
     }
