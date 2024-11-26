@@ -58,7 +58,7 @@ namespace FlowerCommerceAPI.Controllers
         }
 
         // PUT: api/Products/5 (Update an existing product - Admin Only)
-        [Authorize(Roles = "Admin")]
+          [Authorize(Policy = "AdminPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(int id, Product product)
         {
@@ -86,7 +86,7 @@ namespace FlowerCommerceAPI.Controllers
         }
 
         // DELETE: api/Products/5 (Delete a product - Admin Only)
-        [Authorize(Roles = "Admin")]
+          [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

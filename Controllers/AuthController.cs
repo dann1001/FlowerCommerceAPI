@@ -22,7 +22,7 @@ namespace FlowerCommerceAPI.Controllers
             _passwordService = passwordService;
         }
 
-        // 1. User Registration
+        // 1. User Registration - Public
         [AllowAnonymous]
         [HttpPost("register")]
         public IActionResult Register([FromBody] User user)
@@ -34,7 +34,11 @@ namespace FlowerCommerceAPI.Controllers
 
             // Hash the password
             user.PasswordHash = _passwordService.HashPassword(user, user.PasswordHash);
-            user.Role = "User"; // Default role for new users
+             // Role assignment logic
+            if (string.IsNullOrEmpty(user.Role) || (user.Role != "Admin" && user.Role != "User"))
+            {
+                user.Role = "User"; // Default role if not provided or invalid
+            }
 
             // Save to database
             _dbContext.Users.Add(user);
@@ -43,7 +47,7 @@ namespace FlowerCommerceAPI.Controllers
             return Ok("Registration successful");
         }
 
-        // 2. User Login
+        // 2. User Login - Public
         [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult Login([FromBody] User user)
@@ -67,8 +71,8 @@ namespace FlowerCommerceAPI.Controllers
             return Ok(new { Token = token });
         }
 
-        // 3. Password Reset Flow
-        [AllowAnonymous]
+        // 3. Password Reset Flow - Admin Only
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("reset-password")]
         public IActionResult ResetPassword(string email, string newPassword)
         {
@@ -81,6 +85,15 @@ namespace FlowerCommerceAPI.Controllers
             _dbContext.SaveChanges();
 
             return Ok("Password reset successfully");
+        }
+
+        // 4. Admin-Only User List (Example Endpoint)
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpGet("users")]
+        public IActionResult GetAllUsers()
+        {
+            var users = _dbContext.Users.Select(u => new { u.Id, u.Username, u.Email, u.Role }).ToList();
+            return Ok(users);
         }
     }
 }
