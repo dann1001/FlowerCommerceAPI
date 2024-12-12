@@ -2,14 +2,14 @@ namespace FlowerCommerceAPI.Models
 {
     public class Product
     {
-        public int Id { get; set; }
+        public int Id { get; set; } // Unique identifier for the product
 
-        public string? Name { get; set; }
-        public string? Description { get; set; }
-        public decimal Price { get; set; }
-        public int Stock { get; set; }
+        public string? Name { get; set; } // Name of the product
+        public string? Description { get; set; } // Detailed description of the product
+        public decimal Price { get; set; } // Price of the product
+        public int Stock { get; set; } // Stock quantity available
 
-        public string? ImageUrl { get; set; }
-        public int CategoryId { get; set; }
+        public string? ImageUrl { get; set; } // URL of the product image
+        public int CategoryId { get; set; } // ID of the associated category
     }
 }
