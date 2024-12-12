@@ -71,6 +71,11 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<JwtService>();
 // Register PasswordService for dependency injection
 builder.Services.AddScoped<PasswordService>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
+});
 
 var app = builder.Build();
 

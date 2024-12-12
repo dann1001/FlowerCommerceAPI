@@ -4,7 +4,7 @@ using FlowerCommerceAPI.Models; // Adjust the namespace according to your projec
 namespace FlowerCommerceAPI.Services
 {
     public class PasswordService
-    {
+    {  
         private readonly PasswordHasher<User> _passwordHasher = new PasswordHasher<User>();
 
         // Hash the password
