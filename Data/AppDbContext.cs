@@ -10,6 +10,7 @@ namespace FlowerCommerceAPI.Data
         // Register your models here
         public DbSet<Product> Products { get; set; }
         public DbSet<User> Users { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,6 +28,18 @@ namespace FlowerCommerceAPI.Data
                 entity.Property(p => p.Name).IsRequired().HasMaxLength(100);
                 entity.Property(p => p.Price).HasColumnType("decimal(18,2)");
             });
+            modelBuilder.Entity<WishlistItem>()
+    .HasKey(w => new { w.UserId, w.ProductId });
+
+modelBuilder.Entity<WishlistItem>()
+    .HasOne(w => w.User)
+    .WithMany(u => u.Wishlist)
+    .HasForeignKey(w => w.UserId);
+
+modelBuilder.Entity<WishlistItem>()
+    .HasOne(w => w.Product)
+    .WithMany(p => p.WishlistedBy)
+    .HasForeignKey(w => w.ProductId);
         }
     }
 }

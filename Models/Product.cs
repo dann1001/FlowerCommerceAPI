@@ -11,5 +11,6 @@ namespace FlowerCommerceAPI.Models
 
         public string? ImageUrl { get; set; } // URL of the product image
         public int CategoryId { get; set; } // ID of the associated category
-    }
-}
+       public IEnumerable<WishlistItem> WishlistedBy { get; set; } = new List<WishlistItem>();
+
+     }}

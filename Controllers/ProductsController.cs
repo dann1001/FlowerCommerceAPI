@@ -86,7 +86,7 @@ namespace FlowerCommerceAPI.Controllers
         }
 
         // DELETE: api/Products/5 (Delete a product - Admin Only)
-        [Authorize(Roles = "Admin")] // Restricts access to Admins only
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
@@ -103,53 +103,66 @@ namespace FlowerCommerceAPI.Controllers
         }
 
         // POST: api/Products/Wishlist/Add (Add product to user wishlist)
-        [Authorize] // Requires authentication
-        [HttpPost("wishlist/add/{productId}")]
-        public async Task<IActionResult> AddToWishlist(int productId)
-        {
-            var userId = int.Parse(User.FindFirst("Id")?.Value ?? "0"); // Extracts the user ID from JWT claims
-            var user = await _context.Users.Include(u => u.Wishlist).FirstOrDefaultAsync(u => u.Id == userId); // Loads user and wishlist
+      [Authorize] // Requires authentication
+[HttpPost("wishlist/add/{productId}")]
+public async Task<IActionResult> AddToWishlist(int productId)
+{
+    var userId = int.Parse(User.FindFirst("Id")?.Value ?? "0"); // Extracts the user ID from JWT claims
+    var user = await _context.Users.Include(u => u.Wishlist).FirstOrDefaultAsync(u => u.Id == userId); // Loads user and wishlist
 
-            if (user == null)
-            {
-                return NotFound("User not found"); // Returns HTTP 404 if the user is not found
-            }
+    if (user == null)
+    {
+        return NotFound("User not found"); // Returns HTTP 404 if the user is not found
+    }
 
-            if (user.Wishlist.Contains(productId))
-            {
-                return BadRequest("Product already in wishlist"); // Returns HTTP 400 if the product is already in the wishlist
-            }
+    // Create the wishlist item
+    var wishlistItem = new WishlistItem
+    {
+        UserId = userId,
+        ProductId = productId
+    };
 
-            user.Wishlist.Add(productId); // Adds the product to the wishlist
-            await _context.SaveChangesAsync(); // Saves changes to the database
+    // Check if the product is already in the wishlist
+    if (user.Wishlist.Any(w => w.ProductId == productId))
+    {
+        return BadRequest("Product already in wishlist"); // If the product is already in the wishlist
+    }
 
-            return Ok("Product added to wishlist"); // Returns HTTP 200 on success
-        }
+    // Add to wishlist
+    user.Wishlist.Add(wishlistItem); // Adds the product to the wishlist
+    await _context.SaveChangesAsync(); // Saves changes to the database
+
+    return Ok("Product added to wishlist"); // Returns HTTP 200 on success
+}
+
 
         // DELETE: api/Products/Wishlist/Remove (Remove product from user wishlist)
-        [Authorize] // Requires authentication
-        [HttpDelete("wishlist/remove/{productId}")]
-        public async Task<IActionResult> RemoveFromWishlist(int productId)
-        {
-            var userId = int.Parse(User.FindFirst("Id")?.Value ?? "0"); // Extracts the user ID from JWT claims
-            var user = await _context.Users.Include(u => u.Wishlist).FirstOrDefaultAsync(u => u.Id == userId); // Loads user and wishlist
+   [Authorize] // Requires authentication
+[HttpDelete("wishlist/remove/{productId}")]
+public async Task<IActionResult> RemoveFromWishlist(int productId)
+{
+    var userId = int.Parse(User.FindFirst("Id")?.Value ?? "0"); // Extracts the user ID from JWT claims
+    var user = await _context.Users.Include(u => u.Wishlist).FirstOrDefaultAsync(u => u.Id == userId); // Loads user and wishlist
 
-            if (user == null)
-            {
-                return NotFound("User not found"); // Returns HTTP 404 if the user is not found
-            }
+    if (user == null)
+    {
+        return NotFound("User not found"); // Returns HTTP 404 if the user is not found
+    }
 
-            if (!user.Wishlist.Contains(productId))
-            {
-                return BadRequest("Product not in wishlist"); // Returns HTTP 400 if the product is not in the wishlist
-            }
+    // Find the wishlist item to remove
+    var wishlistItem = user.Wishlist.FirstOrDefault(w => w.ProductId == productId);
 
-            user.Wishlist.Remove(productId); // Removes the product from the wishlist
-            await _context.SaveChangesAsync(); // Saves changes to the database
+    if (wishlistItem == null)
+    {
+        return BadRequest("Product not in wishlist"); // If the product is not in the wishlist
+    }
 
-            return Ok("Product removed from wishlist"); // Returns HTTP 200 on success
-        }
+    // Remove the product from wishlist
+    user.Wishlist.Remove(wishlistItem); // Removes the product from the wishlist
+    await _context.SaveChangesAsync(); // Saves changes to the database
 
+    return Ok("Product removed from wishlist"); // Returns HTTP 200 on success
+}
         // Helper method to check if a product exists
         private bool ProductExists(int id)
         {
