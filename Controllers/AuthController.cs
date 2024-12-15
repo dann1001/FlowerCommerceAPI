@@ -18,12 +18,7 @@ namespace FlowerCommerceAPI.Controllers
         private readonly JwtService _jwtService;
         private readonly PasswordService _passwordService;
 
-        /// <summary>
-        /// Initializes a new instance of the AuthController class.
-        /// </summary>
-        /// <param name="dbContext">The database context.</param>
-        /// <param name="jwtService">The JWT service for generating authentication tokens.</param>
-        /// <param name="passwordService">The password service for hashing and verifying passwords.</param>
+
         public AuthController(AppDbContext dbContext, JwtService jwtService, PasswordService passwordService)
         {
             _dbContext = dbContext;

@@ -4,6 +4,7 @@ using FlowerCommerceAPI.Data;
 using FlowerCommerceAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FlowerCommerceAPI.Controllers
@@ -16,13 +17,18 @@ namespace FlowerCommerceAPI.Controllers
 
         public ProductsController(AppDbContext context)
         {
-            _context = context; // Injects the database context
+            _context = context ?? throw new ArgumentNullException(nameof(context)); // Ensure _context is not null
         }
 
         // GET: api/Products (Fetch all products - Public Access)
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
+            if (_context.Products == null)
+            {
+                return NotFound("Products not found.");
+            }
+
             var products = await _context.Products.ToListAsync(); // Retrieves all products from the database
             return Ok(products); // Returns the list of products as an HTTP 200 response
         }
@@ -31,6 +37,11 @@ namespace FlowerCommerceAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
+            if (_context.Products == null)
+            {
+                return NotFound("Products not found.");
+            }
+
             var product = await _context.Products.FindAsync(id); // Finds a product by ID
 
             if (product == null)
@@ -90,6 +101,11 @@ namespace FlowerCommerceAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
+            if (_context.Products == null)
+            {
+                return NotFound("Products not found.");
+            }
+
             var product = await _context.Products.FindAsync(id); // Finds the product by ID
             if (product == null)
             {
@@ -103,87 +119,100 @@ namespace FlowerCommerceAPI.Controllers
         }
 
         // POST: api/Products/Wishlist/Add (Add product to user wishlist)
-      [Authorize]
-[HttpPost("wishlist/add/{productId}")]
-public async Task<IActionResult> AddToWishlist(int productId)
-{
-    // Validate JWT and extract user ID
-    var userIdClaim = User.FindFirst("Id")?.Value;
-    if (string.IsNullOrEmpty(userIdClaim))
-    {
-        return Unauthorized("User not authenticated or ID claim missing.");
-    }
-    var userId = int.Parse(userIdClaim);
+        [Authorize]
+        [HttpPost("wishlist/add/{productId}")]
+        public async Task<IActionResult> AddToWishlist(int productId)
+        {
+            // Validate JWT and extract user ID
+            var userIdClaim = User.FindFirst("Id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized("User not authenticated or ID claim missing.");
+            }
+            var userId = int.Parse(userIdClaim);
 
-    // Validate Product ID
-    if (productId <= 0)
-    {
-        return BadRequest("Invalid product ID.");
-    }
+            // Validate Product ID
+            if (productId <= 0)
+            {
+                return BadRequest("Invalid product ID.");
+            }
 
-    // Check if product exists
-    var product = await _context.Products.FindAsync(productId);
-    if (product == null)
-    {
-        return NotFound("Product does not exist.");
-    }
+            // Check if product exists
+            var product = await _context.Products.FindAsync(productId);
+            if (product == null)
+            {
+                return NotFound("Product does not exist.");
+            }
 
-    // Load user and wishlist
-    var user = await _context.Users.Include(u => u.Wishlist).FirstOrDefaultAsync(u => u.Id == userId);
-    if (user == null)
-    {
-        return NotFound("User not found.");
-    }
+            // Load user and wishlist
+            var user = await _context.Users.Include(u => u.Wishlist).FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
 
-    // Check if product is already in wishlist
-    if (user.Wishlist.Any(w => w.ProductId == productId))
-    {
-        return BadRequest("Product already in wishlist.");
-    }
+            // Ensure the Wishlist is not null before adding
+            user.Wishlist ??= new List<WishlistItem>();
 
-    // Add product to wishlist
-    var wishlistItem = new WishlistItem
-    {
-        UserId = userId,
-        ProductId = productId
-    };
-    user.Wishlist.Add(wishlistItem);
-    await _context.SaveChangesAsync();
+            // Check if product is already in wishlist
+            if (user.Wishlist.Any(w => w.ProductId == productId))
+            {
+                return BadRequest("Product already in wishlist.");
+            }
 
-    return Ok("Product added to wishlist.");
-}
+            // Add product to wishlist
+            var wishlistItem = new WishlistItem
+            {
+                UserId = userId,
+                ProductId = productId
+            };
+            user.Wishlist.Add(wishlistItem);
+            await _context.SaveChangesAsync();
+
+            return Ok("Product added to wishlist.");
+        }
 
         // DELETE: api/Products/Wishlist/Remove (Remove product from user wishlist)
-   [Authorize] // Requires authentication
-[HttpDelete("wishlist/remove/{productId}")]
-public async Task<IActionResult> RemoveFromWishlist(int productId)
-{
-    var userId = int.Parse(User.FindFirst("Id")?.Value ?? "0"); // Extracts the user ID from JWT claims
-    var user = await _context.Users.Include(u => u.Wishlist).FirstOrDefaultAsync(u => u.Id == userId); // Loads user and wishlist
+        [Authorize] // Requires authentication
+        [HttpDelete("wishlist/remove/{productId}")]
+        public async Task<IActionResult> RemoveFromWishlist(int productId)
+        {
+            var userIdClaim = User.FindFirst("Id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized("User not authenticated or ID claim missing.");
+            }
 
-    if (user == null)
-    {
-        return NotFound("User not found"); // Returns HTTP 404 if the user is not found
-    }
+            var userId = int.Parse(userIdClaim);
 
-    // Find the wishlist item to remove  
-    var wishlistItem = user.Wishlist.FirstOrDefault(w => w.ProductId == productId);
+            // Load user and wishlist
+            var user = await _context.Users.Include(u => u.Wishlist).FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
 
-    if (wishlistItem == null)
-    {
-        return BadRequest("Product not in wishlist"); // If the product is not in the wishlist
-    }
+            // Ensure the Wishlist is not null before removing
+            user.Wishlist ??= new List<WishlistItem>();
 
-    // Remove the product from wishlist
-    user.Wishlist.Remove(wishlistItem); // Removes the product from the wishlist
-    await _context.SaveChangesAsync(); // Saves changes to the database
+            // Find the wishlist item to remove
+            var wishlistItem = user.Wishlist.FirstOrDefault(w => w.ProductId == productId);
+            if (wishlistItem == null)
+            {
+                return BadRequest("Product not in wishlist");
+            }
 
-    return Ok("Product removed from wishlist"); // Returns HTTP 200 on success
-}
+            // Remove the product from wishlist
+            user.Wishlist.Remove(wishlistItem); // Ensure Wishlist is not null before removing
+            await _context.SaveChangesAsync();
+
+            return Ok("Product removed from wishlist");
+        }
+
         // Helper method to check if a product exists
         private bool ProductExists(int id)
         {
-            return _context.Products.Any(e => e.Id == id); // Checks if a product exists by ID
+            return _context.Products?.Any(e => e.Id == id) ?? false; // Safe null check for Products
         }
     }
 }
