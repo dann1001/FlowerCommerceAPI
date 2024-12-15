@@ -11,11 +11,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Flower Commerce API", Version = "v1" });
 
-    // Add JWT Bearer Authentication configuration to Swagger UI
+    // <summary>
+    // Add JWT Bearer Authentication configuration to Swagger UI. This enables Swagger to show the correct
+    // authorization header and prompts users to input their JWT token for authorized routes.
+    // </summary>
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -26,7 +30,9 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Enter 'Bearer' followed by your token in the text box below.\nExample: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     });
 
-    // Add security requirement to Swagger for authenticated routes
+    // <summary>
+    // Add security requirement to Swagger UI for authenticated routes. This ensures that Swagger enforces the use of the Bearer token for authorized endpoints.
+    // </summary>
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -43,12 +49,16 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure the DbContext with SQL Server and connection string from appsettings.json
+// <summary>
+// Configure the DbContext with SQL Server. This sets up the application's connection to the database using the connection string from appsettings.json.
+// </summary>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// Add JWT Authentication services to the container
+// <summary>
+// Add JWT Authentication services to the container. This sets up the default JWT authentication scheme and configures the necessary parameters for validating JWT tokens.
+// </summary>
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -68,13 +78,19 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Register JwtService for handling JWT token generation
+// <summary>
+// Register the JwtService for handling JWT token generation. The service is responsible for creating JWT tokens that clients can use to authenticate themselves.
+// </summary>
 builder.Services.AddScoped<JwtService>();
 
-// Register PasswordService for handling password hashing and verification
+// <summary>
+// Register the PasswordService for handling password hashing and verification. This service will help to securely store and check user passwords.
+// </summary>
 builder.Services.AddScoped<PasswordService>();
 
-// Configure authorization policies
+// <summary>
+// Configure authorization policies. These policies are used to enforce access control based on user roles. In this case, we define two roles: Admin and User.
+// </summary>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
@@ -83,25 +99,37 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// <summary>
+// Configure the HTTP request pipeline. This block sets up Swagger UI for API documentation in the development environment and enables the middleware for authentication and authorization.
+// </summary>
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Enable HTTPS redirection in production environments
+// <summary>
+// Enable HTTPS redirection in production environments to ensure secure communication over HTTPS.
+// </summary>
 app.UseHttpsRedirection();
 
-// Enable Authentication and Authorization middleware
+// <summary>
+// Enable Authentication and Authorization middleware. This ensures that requests are authenticated and authorized before accessing protected resources.
+// </summary>
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Define a simple route for the root path
+// <summary>
+// Define a simple route for the root path to display a welcome message.
+// </summary>
 app.MapGet("/", () => Results.Content("Welcome to the Flower Commerce API!"));
 
-// Map controllers for API endpoints
+// <summary>
+// Map controllers for API endpoints. This sets up the routes that handle HTTP requests and are mapped to controller actions.
+// </summary>
 app.MapControllers();
 
-// Run the application
+// <summary>
+// Run the application. This starts the web server and begins listening for incoming requests.
+// </summary>
 app.Run();
