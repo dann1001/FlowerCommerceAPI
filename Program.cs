@@ -13,9 +13,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Flower Commerce API", Version = "v1" });
 
-    // Add JWT Bearer Authentication
+    // Add JWT Bearer Authentication configuration to Swagger UI
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -23,9 +23,10 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' followed by your token in the text box below.\nExample: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        Description = "Enter 'Bearer' followed by your token in the text box below.\nExample: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
     });
 
+    // Add security requirement to Swagger for authenticated routes
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -40,14 +41,14 @@ builder.Services.AddSwaggerGen(c =>
             new string[] {}
         }
     });
-}); // <-- Properly close the SwaggerGen configuration block here
+});
 
 // Configure the DbContext with SQL Server and connection string from appsettings.json
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// Add JWT Authentication
+// Add JWT Authentication services to the container
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -67,10 +68,13 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Add JwtService for handling token generation
+// Register JwtService for handling JWT token generation
 builder.Services.AddScoped<JwtService>();
-// Register PasswordService for dependency injection
+
+// Register PasswordService for handling password hashing and verification
 builder.Services.AddScoped<PasswordService>();
+
+// Configure authorization policies
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
@@ -86,10 +90,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Remove or comment out the HTTPS redirection
+// Enable HTTPS redirection in production environments
 app.UseHttpsRedirection();
 
-// Enable Authentication and Authorization
+// Enable Authentication and Authorization middleware
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -99,4 +103,5 @@ app.MapGet("/", () => Results.Content("Welcome to the Flower Commerce API!"));
 // Map controllers for API endpoints
 app.MapControllers();
 
+// Run the application
 app.Run();

@@ -1,129 +1,130 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using FlowerCommerceAPI.Data;
 using FlowerCommerceAPI.Models;
-using Microsoft.EntityFrameworkCore;
+using FlowerCommerceAPI.Services;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FlowerCommerceAPI.Controllers
 {
+    /// <summary>
+    /// Controller responsible for handling product-related API requests.
+    /// Provides endpoints for retrieving, creating, updating, and deleting products.
+    /// Also allows users to add or remove products from their wishlist.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IProductService _productService;
+        private readonly IWishlistService _wishlistService;
 
-        public ProductsController(AppDbContext context)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProductsController"/> class.
+        /// </summary>
+        /// <param name="productService">Service for handling product-related operations.</param>
+        /// <param name="wishlistService">Service for handling wishlist-related operations.</param>
+        public ProductsController(IProductService productService, IWishlistService wishlistService)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context)); // Ensure _context is not null
+            _productService = productService ?? throw new ArgumentNullException(nameof(productService));
+            _wishlistService = wishlistService ?? throw new ArgumentNullException(nameof(wishlistService));
         }
 
-        // GET: api/Products (Fetch all products - Public Access)
+        /// <summary>
+        /// Gets all products in the system (Public Access).
+        /// </summary>
+        /// <returns>A list of all products.</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
-            if (_context.Products == null)
+            var products = await _productService.GetProductsAsync();
+            if (products == null)
             {
                 return NotFound("Products not found.");
             }
 
-            var products = await _context.Products.ToListAsync(); // Retrieves all products from the database
-            return Ok(products); // Returns the list of products as an HTTP 200 response
+            return Ok(products);
         }
 
-        // GET: api/Products/5 (Fetch a single product by ID - Public Access)
+        /// <summary>
+        /// Gets a specific product by its ID (Public Access).
+        /// </summary>
+        /// <param name="id">The ID of the product to retrieve.</param>
+        /// <returns>The requested product if found.</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            if (_context.Products == null)
-            {
-                return NotFound("Products not found.");
-            }
-
-            var product = await _context.Products.FindAsync(id); // Finds a product by ID
-
+            var product = await _productService.GetProductByIdAsync(id);
             if (product == null)
             {
-                return NotFound(); // Returns HTTP 404 if the product is not found
+                return NotFound();
             }
 
-            return Ok(product); // Returns the product as an HTTP 200 response
+            return Ok(product);
         }
 
-        // POST: api/Products (Create a new product - Admin Only)
-        [Authorize(Roles = "Admin")] // Restricts access to Admins only
+        /// <summary>
+        /// Creates a new product (Admin Only).
+        /// </summary>
+        /// <param name="product">The product to create.</param>
+        /// <returns>The created product with its ID.</returns>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)
         {
             if (product == null)
             {
-                return BadRequest("Product data is null"); // Returns HTTP 400 if no data is provided
+                return BadRequest("Product data is null");
             }
 
-            _context.Products.Add(product); // Adds the product to the database
-            await _context.SaveChangesAsync(); // Saves changes to the database
-
-            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product); // Returns HTTP 201 with the created product
+            var createdProduct = await _productService.CreateProductAsync(product);
+            return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.Id }, createdProduct);
         }
 
-        // PUT: api/Products/5 (Update an existing product - Admin Only)
-        [Authorize(Roles = "Admin")] // Restricts access to Admins only
+        /// <summary>
+        /// Updates an existing product by its ID (Admin Only).
+        /// </summary>
+        /// <param name="id">The ID of the product to update.</param>
+        /// <param name="product">The updated product data.</param>
+        /// <returns>A status of the update operation.</returns>
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(int id, Product product)
         {
-            if (id != product.Id)
+            if (!await _productService.UpdateProductAsync(id, product))
             {
-                return BadRequest("Product ID mismatch"); // Returns HTTP 400 if IDs don't match
+                return BadRequest("Product ID mismatch or product not found");
             }
 
-            _context.Entry(product).State = EntityState.Modified; // Marks the product as modified
-
-            try
-            {
-                await _context.SaveChangesAsync(); // Attempts to save changes
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
-                {
-                    return NotFound(); // Returns HTTP 404 if the product no longer exists
-                }
-                throw; // Re-throws the exception if it's not related to product existence
-            }
-
-            return NoContent(); // Returns HTTP 204 if update is successful
+            return NoContent();
         }
 
-        // DELETE: api/Products/5 (Delete a product - Admin Only)
+        /// <summary>
+        /// Deletes a product by its ID (Admin Only).
+        /// </summary>
+        /// <param name="id">The ID of the product to delete.</param>
+        /// <returns>A status of the delete operation.</returns>
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            if (_context.Products == null)
+            if (!await _productService.DeleteProductAsync(id))
             {
-                return NotFound("Products not found.");
+                return NotFound("Product not found");
             }
 
-            var product = await _context.Products.FindAsync(id); // Finds the product by ID
-            if (product == null)
-            {
-                return NotFound(); // Returns HTTP 404 if the product is not found
-            }
-
-            _context.Products.Remove(product); // Removes the product from the database
-            await _context.SaveChangesAsync(); // Saves changes to the database
-
-            return NoContent(); // Returns HTTP 204 if deletion is successful
+            return NoContent();
         }
 
-        // POST: api/Products/Wishlist/Add (Add product to user wishlist)
+        /// <summary>
+        /// Adds a product to the authenticated user's wishlist.
+        /// </summary>
+        /// <param name="productId">The ID of the product to add to the wishlist.</param>
+        /// <returns>A status of the add operation.</returns>
         [Authorize]
         [HttpPost("wishlist/add/{productId}")]
         public async Task<IActionResult> AddToWishlist(int productId)
         {
-            // Validate JWT and extract user ID
             var userIdClaim = User.FindFirst("Id")?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
             {
@@ -131,49 +132,20 @@ namespace FlowerCommerceAPI.Controllers
             }
             var userId = int.Parse(userIdClaim);
 
-            // Validate Product ID
-            if (productId <= 0)
+            if (!await _wishlistService.AddToWishlistAsync(userId, productId))
             {
-                return BadRequest("Invalid product ID.");
+                return BadRequest("Product already in wishlist or not found.");
             }
-
-            // Check if product exists
-            var product = await _context.Products.FindAsync(productId);
-            if (product == null)
-            {
-                return NotFound("Product does not exist.");
-            }
-
-            // Load user and wishlist
-            var user = await _context.Users.Include(u => u.Wishlist).FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            // Ensure the Wishlist is not null before adding
-            user.Wishlist ??= new List<WishlistItem>();
-
-            // Check if product is already in wishlist
-            if (user.Wishlist.Any(w => w.ProductId == productId))
-            {
-                return BadRequest("Product already in wishlist.");
-            }
-
-            // Add product to wishlist
-            var wishlistItem = new WishlistItem
-            {
-                UserId = userId,
-                ProductId = productId
-            };
-            user.Wishlist.Add(wishlistItem);
-            await _context.SaveChangesAsync();
 
             return Ok("Product added to wishlist.");
         }
 
-        // DELETE: api/Products/Wishlist/Remove (Remove product from user wishlist)
-        [Authorize] // Requires authentication
+        /// <summary>
+        /// Removes a product from the authenticated user's wishlist.
+        /// </summary>
+        /// <param name="productId">The ID of the product to remove from the wishlist.</param>
+        /// <returns>A status of the remove operation.</returns>
+        [Authorize]
         [HttpDelete("wishlist/remove/{productId}")]
         public async Task<IActionResult> RemoveFromWishlist(int productId)
         {
@@ -182,37 +154,14 @@ namespace FlowerCommerceAPI.Controllers
             {
                 return Unauthorized("User not authenticated or ID claim missing.");
             }
-
             var userId = int.Parse(userIdClaim);
 
-            // Load user and wishlist
-            var user = await _context.Users.Include(u => u.Wishlist).FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
+            if (!await _wishlistService.RemoveFromWishlistAsync(userId, productId))
             {
-                return NotFound("User not found");
+                return BadRequest("Product not in wishlist or not found.");
             }
-
-            // Ensure the Wishlist is not null before removing
-            user.Wishlist ??= new List<WishlistItem>();
-
-            // Find the wishlist item to remove
-            var wishlistItem = user.Wishlist.FirstOrDefault(w => w.ProductId == productId);
-            if (wishlistItem == null)
-            {
-                return BadRequest("Product not in wishlist");
-            }
-
-            // Remove the product from wishlist
-            user.Wishlist.Remove(wishlistItem); // Ensure Wishlist is not null before removing
-            await _context.SaveChangesAsync();
 
             return Ok("Product removed from wishlist");
-        }
-
-        // Helper method to check if a product exists
-        private bool ProductExists(int id)
-        {
-            return _context.Products?.Any(e => e.Id == id) ?? false; // Safe null check for Products
         }
     }
 }
