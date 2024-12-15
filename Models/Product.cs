@@ -1,19 +1,62 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace FlowerCommerceAPI.Models
 {
+    /// <summary>
+    /// Represents a product in the system.
+    /// </summary>
     public class Product
     {
-        public int Id { get; set; } // Unique identifier for the product
+        /// <summary>
+        /// Gets or sets the unique identifier for the product.
+        /// </summary>
+        public int Id { get; set; }
 
-        public string? Name { get; set; } // Name of the product
-        public string? Description { get; set; } // Detailed description of the product
-        public decimal Price { get; set; } // Price of the product
-        public int Stock { get; set; } // Stock quantity available
+        /// <summary>
+        /// Gets or sets the name of the product.
+        /// </summary>
+        [Required]
+        [MaxLength(100)] // Ensure a max length for name
+        public string Name { get; set; } = string.Empty;
 
-        public string? ImageUrl { get; set; } // URL of the product image
-        public int CategoryId { get; set; } // ID of the associated category
+        /// <summary>
+        /// Gets or sets the description of the product.
+        /// </summary>
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the price of the product.
+        /// </summary>
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive value.")]
+        public decimal Price { get; set; }
+
+        /// <summary>
+        /// Gets or sets the stock quantity available.
+        /// </summary>
+        [Range(0, int.MaxValue, ErrorMessage = "Stock must be a non-negative value.")]
+        public int Stock { get; set; }
+
+        /// <summary>
+        /// Gets or sets the URL of the product image.
+        /// </summary>
+        public string? ImageUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the associated category.
+        /// </summary>
+        public int CategoryId { get; set; }
+
+        /// <summary>
+        /// Navigation property for the wishlist items that have this product.
+        /// </summary>
         [JsonIgnore]
-       public IEnumerable<WishlistItem> WishlistedBy { get; set; } = new List<WishlistItem>();
+        public ICollection<WishlistItem> WishlistedBy { get; set; } = new List<WishlistItem>();
 
-     }}
+        // Optional: Constructor for initializing properties
+        public Product()
+        {
+            // Any other initialization logic, if necessary
+        }
+    }
+}
