@@ -10,6 +10,8 @@ namespace FlowerCommerceAPI.Data
         // Register your models here
         public DbSet<Product> Products { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<WishlistItem> WishlistItems { get; set; }
+
         
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -49,27 +49,28 @@ namespace FlowerCommerceAPI.Controllers
 
         // 2. User Login - Public
         [AllowAnonymous]
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] User user)
-        {
-            if (user == null || string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.PasswordHash))
-            {
-                return BadRequest("Username and Password are required.");
-            }
+[HttpPost("login")]
+public IActionResult Login([FromBody] User user)
+{
+    if (user == null || string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.PasswordHash))
+    {
+        return BadRequest("Username and Password are required.");
+    }
 
-            // Find user by username
-            var existingUser = _dbContext.Users.FirstOrDefault(u => u.Username == user.Username);
+    // Find user by username
+    var existingUser = _dbContext.Users.FirstOrDefault(u => u.Username == user.Username);
 
-            // Verify password
-            if (existingUser == null || !_passwordService.VerifyPassword(existingUser, user.PasswordHash))
-            {
-                return Unauthorized("Invalid username or password");
-            }
+    // Verify password
+    if (existingUser == null || !_passwordService.VerifyPassword(existingUser, user.PasswordHash))
+    {
+        return Unauthorized("Invalid username or password");
+    }
 
-            // Generate JWT token
-            var token = _jwtService.GenerateToken(existingUser.Username, existingUser.Role);
-            return Ok(new { Token = token });
-        }
+    // Generate JWT token
+    var token = _jwtService.GenerateToken(existingUser.Username, existingUser.Role, existingUser.Id); // Use 'false' for regular sessions
+    return Ok(new { Token = token });
+}
+
 
         // 3. Password Reset Flow - Admin Only
         [Authorize(Policy = "AdminPolicy")]

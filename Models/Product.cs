@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace FlowerCommerceAPI.Models
 {
     public class Product
@@ -11,6 +13,7 @@ namespace FlowerCommerceAPI.Models
 
         public string? ImageUrl { get; set; } // URL of the product image
         public int CategoryId { get; set; } // ID of the associated category
+        [JsonIgnore]
        public IEnumerable<WishlistItem> WishlistedBy { get; set; } = new List<WishlistItem>();
 
      }}

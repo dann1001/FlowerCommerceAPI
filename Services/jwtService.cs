@@ -30,41 +30,44 @@ namespace FlowerCommerceAPI.Services
         /// <param name="role">The role of the user.</param>
         /// <param name="rememberMe">Whether to extend the token's expiration time.</param>
         /// <returns>A JWT token as a string.</returns>
-        public string GenerateToken(string username, string role, bool rememberMe = false)
-        {
-            if (string.IsNullOrEmpty(username))
-                throw new ArgumentException("Username cannot be null or empty.", nameof(username));
+       public string GenerateToken(string username, string role, int userId)
+{
+    if (string.IsNullOrEmpty(username))
+        throw new ArgumentException("Username cannot be null or empty.", nameof(username));
 
-            if (string.IsNullOrEmpty(role))
-                throw new ArgumentException("Role cannot be null or empty.", nameof(role));
+    if (string.IsNullOrEmpty(role))
+        throw new ArgumentException("Role cannot be null or empty.", nameof(role));
 
-            // Define claims for the token
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, role),
-                new Claim(JwtRegisteredClaimNames.Sub, username), // Add subject claim for username
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // Unique identifier for the token
-            };
+    // Define claims for the token
+    var claims = new[]
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, username), // Use 'username' directly
+        new Claim("Id", userId.ToString()), // Use 'userId' passed as parameter
+        new Claim(ClaimTypes.Name, username), 
+        new Claim(ClaimTypes.Role, role),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // Unique identifier for the token
+    };
 
-            // Determine the expiration time based on "rememberMe" flag
-            var expires = DateTime.UtcNow.AddMinutes(rememberMe ? RememberMeLifetime : TokenLifetime);
+    // Determine the expiration time based on "rememberMe" flag
+    // var expires = DateTime.UtcNow.AddMinutes(rememberMe ? RememberMeLifetime : TokenLifetime);
+  
 
-            // Generate a security key
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    // Generate a security key
+    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            // Create the token
-            var token = new JwtSecurityToken(
-                issuer: _issuer,
-                audience: _audience,
-                claims: claims,
-                expires: expires, // Set expiration time
-                signingCredentials: creds
-            );
+    // Create the token
+    var token = new JwtSecurityToken(
+        issuer: _issuer,
+        audience: _audience,
+        claims: claims,
+        expires: DateTime.UtcNow.AddMinutes(1600),
+        signingCredentials: creds
+    );
 
-            // Return the serialized token
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+    // Return the serialized token
+    return new JwtSecurityTokenHandler().WriteToken(token);
+}
+
     }
 }

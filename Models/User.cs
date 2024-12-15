@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace FlowerCommerceAPI.Models
 {
@@ -24,6 +25,7 @@ namespace FlowerCommerceAPI.Models
     public string? PhoneNumber { get; set; }
 
     // Navigation property for Wishlist
+    [JsonIgnore]
    public ICollection<WishlistItem> Wishlist { get; set; } = new List<WishlistItem>();
 
 }
