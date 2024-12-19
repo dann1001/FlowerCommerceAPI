@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FlowerCommerceAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+337180558bf95c4c7d3e4408a48c292f411ad3f9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c7e546edafd0c14dca25a7c06a2360db146efb84")]
 [assembly: System.Reflection.AssemblyProductAttribute("FlowerCommerceAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FlowerCommerceAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
