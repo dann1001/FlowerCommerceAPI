@@ -67,7 +67,7 @@ namespace FlowerCommerceAPI.Models
         /// <summary>
         /// Gets or sets the user's phone number.
         /// </summary>
-        [Phone] // Validates phone number format
+        //[Phone] // Validates phone number format
         public string? PhoneNumber { get; set; }
 
         /// <summary>
