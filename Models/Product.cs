@@ -8,42 +8,36 @@ namespace FlowerCommerceAPI.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(100)] // Ensure a max length for name
-        public string Name { get; set; } = string.Empty;
+        [MaxLength(100)] // Ensure a max length for the name
+        public string NameEn { get; set; } = string.Empty; // English name
 
-        public string? NamePe { get; set; }
+        [MaxLength(100)]
+        public string? NamePe { get; set; } // Persian name
 
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive value.")]
-        public decimal? PricePe { get; set; }
+        public decimal? PricePe { get; set; } // Persian price (optional)
+
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive value.")]
+        public decimal? PriceEn { get; set; } // English price (optional)
 
         public string? Description { get; set; }
-
-        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive value.")]
-        public decimal Price { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "Stock must be a non-negative value.")]
         public int Stock { get; set; }
 
-        public string? ImageUrl { get; set; }
+        public string? ImageUrl { get; set; } // Single property for images
 
-        public string? Picture { get; set; }
+        public string? TypePe { get; set; } // Persian type
 
-        public string? TypePe { get; set; }
+        public string? TypeEn { get; set; } // English type
 
-        public string? CategoryPe { get; set; }
+        public string? CategoryPe { get; set; } // Persian category
 
-        public bool Favorite { get; set; }
+        public string? CategoryEn { get; set; } // English category
 
-        public string? NameEn { get; set; }
+        public bool Favorite { get; set; } // Mark as a favorite
 
-        public string? TypeEn { get; set; }
-
-        public string? CategoryEn { get; set; }
-
-        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive value.")]
-        public decimal? PriceEn { get; set; }
-
-        public int CategoryId { get; set; }
+        public int CategoryId { get; set; } // Foreign key for category
 
         [JsonIgnore]
         public ICollection<WishlistItem> WishlistedBy { get; set; } = new List<WishlistItem>();

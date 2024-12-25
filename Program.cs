@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.Options;
 using FlowerCommerceAPI.Data;
 using FlowerCommerceAPI.Services;
 using Microsoft.OpenApi.Models;
@@ -12,6 +14,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// Add Localization services
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+// Add supported cultures
+var supportedCultures = new[] { "en-US", "fa-IR" }; // Example: English and Persian
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en-US");
+    options.SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+    options.SupportedUICultures = options.SupportedCultures;
+});
+
+// Add Swagger configuration
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Flower Commerce API", Version = "v1" });
@@ -85,6 +100,10 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
+// Use Localization Middleware
+var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
+app.UseRequestLocalization(localizationOptions);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
