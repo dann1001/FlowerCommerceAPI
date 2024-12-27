@@ -5,6 +5,8 @@ using FlowerCommerceAPI.Models;
 using FlowerCommerceAPI.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Globalization;
+
 
 namespace FlowerCommerceAPI.Controllers
 {
@@ -35,24 +37,47 @@ namespace FlowerCommerceAPI.Controllers
             return Ok(products);
         }
 
+
+
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<IActionResult> GetProduct(int id)
         {
+            // Get the current culture (e.g., "en-US")
+            var culture = CultureInfo.CurrentCulture.Name;
+
+            // Fetch the product from the service (assuming _productService handles fetching with translations)
             var product = await _productService.GetProductByIdAsync(id);
+
             if (product == null)
             {
                 return NotFound();
             }
 
-            // Example of localized fields
-            var localizedName = _localizer["Product_Name"];
-            var localizedDescription = _localizer["Product_Description"];
+            // Find the translation for the current culture or fallback to default language
+            var productTranslation = product.Translations
+                                            .FirstOrDefault(t => t.Language == culture) ??
+                                     product.Translations.FirstOrDefault(t => t.Language == "en-US");
 
-            product.Name = localizedName; // You can replace these with actual localized content
-            product.Description = localizedDescription;
+            // If a translation is found, use it. Otherwise, use localization service to fetch localized content
+            if (productTranslation != null)
+            {
+                product.Name = productTranslation.Name;
+                product.Description = productTranslation.Description;
+            }
+            else
+            {
+                // Fallback to localization service if no translation exists in the database
+                var localizedName = _localizer["Product_Name"];
+                var localizedDescription = _localizer["Product_Description"];
+
+                product.Name = localizedName; // Replace with localized content from resource files
+                product.Description = localizedDescription;
+            }
 
             return Ok(product);
         }
+
+
 
         [Authorize(Roles = "Admin")]
         [HttpPost]

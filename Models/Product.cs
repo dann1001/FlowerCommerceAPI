@@ -29,7 +29,8 @@ namespace FlowerCommerceAPI.Models
 
         [JsonIgnore]
         public ICollection<WishlistItem> WishlistedBy { get; set; } = new List<WishlistItem>();
-
+        // Navigation property to load translations dynamically
+        public List<ProductTranslation> Translations { get; set; }
         // Maintenance Fields
         public decimal? WaterRequirement { get; set; }
         public decimal? LightRequirement { get; set; }

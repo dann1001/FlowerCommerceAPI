@@ -1,12 +1,17 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using FlowerCommerceAPI;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Options;
 using FlowerCommerceAPI.Data;
 using FlowerCommerceAPI.Services;
-using Microsoft.OpenApi.Models;
+using FlowerCommerceAPI.Models; // Replace with the correct namespace if different
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,7 +83,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"] ?? throw new ArgumentNullException("JwtSettings:SecretKey")))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"] ?? throw new ArgumentNullException("JwtSettings:SecretKey"))),
     };
 });
 
@@ -124,5 +129,48 @@ app.MapGet("/", () => Results.Content("Welcome to the Flower Commerce API!"));
 // Map controllers for API endpoints
 app.MapControllers();
 
-// Run the application.
+// Ensure that the database is created and seeded
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<AppDbContext>();
+
+    // Make sure to apply migrations first
+    context.Database.Migrate(); // Applies any pending migrations
+
+    // Call the local function to seed data
+    SeedData(context).Wait(); // Seed the data
+}
+
 app.Run();
+
+// Local function to seed data
+async Task SeedData(AppDbContext context)
+{
+    // Check if data is already seeded to prevent duplicates
+    if (!context.Products.Any())
+    {
+        var product = new Product
+        {
+            CategoryId = 1,
+            Translations = new List<ProductTranslation>
+            {
+                new ProductTranslation
+                {
+                    Language = "en-US",
+                    Name = "Sample Product",
+                    Description = "This is a sample product"
+                },
+                new ProductTranslation
+                {
+                    Language = "fa-IR",
+                    Name = "محصول نمونه",
+                    Description = "این یک محصول نمونه است"
+                }
+            }
+        };
+
+        context.Products.Add(product);
+        await context.SaveChangesAsync();
+    }
+}
