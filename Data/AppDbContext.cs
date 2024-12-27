@@ -17,46 +17,46 @@ namespace FlowerCommerceAPI.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Seed data for Products and Translations
-            modelBuilder.Entity<Product>().HasData(
-                new Product
-                {
-                    Id = 1, // Primary key or auto-generated ID
-                    CategoryId = 1,
-                    Translations = new List<ProductTranslation>
-                    {
-                        new ProductTranslation
-                        {
-                            Language = "en-US",
-                            Name = "Sample Product",
-                            Description = "This is a sample product"
-                        },
-                        new ProductTranslation
-                        {
-                            Language = "fa-IR",
-                            Name = "محصول نمونه",
-                            Description = "این یک محصول نمونه است"
-                        }
-                    }
-                }
-            );
+            // // Seed data for Products and Translations
+            // modelBuilder.Entity<Product>().HasData(
+            //     new Product
+            //     {
+            //         Id = 1, // Primary key or auto-generated ID
+            //         CategoryId = 1,
+            //         Translations = new List<ProductTranslation>
+            //         {
+            //             new ProductTranslation
+            //             {
+            //                 Language = "en-US",
+            //                 Name = "Sample Product",
+            //                 Description = "This is a sample product"
+            //             },
+            //             new ProductTranslation
+            //             {
+            //                 Language = "fa-IR",
+            //                 Name = "محصول نمونه",
+            //                 Description = "این یک محصول نمونه است"
+            //             }
+            //         }
+            //     }
+            // );
 
-            modelBuilder.Entity<ProductTranslation>().HasData(
-                new ProductTranslation
-                {
-                    ProductId = 1,
-                    Language = "en-US",
-                    Name = "Sample Product",
-                    Description = "This is a sample product"
-                },
-                new ProductTranslation
-                {
-                    ProductId = 1,
-                    Language = "fa-IR",
-                    Name = "محصول نمونه",
-                    Description = "این یک محصول نمونه است"
-                }
-            );
+            // modelBuilder.Entity<ProductTranslation>().HasData(
+            //     new ProductTranslation
+            //     {
+            //         ProductId = 1,
+            //         Language = "en-US",
+            //         Name = "Sample Product",
+            //         Description = "This is a sample product"
+            //     },
+            //     new ProductTranslation
+            //     {
+            //         ProductId = 1,
+            //         Language = "fa-IR",
+            //         Name = "محصول نمونه",
+            //         Description = "این یک محصول نمونه است"
+            //     }
+            // );
 
             // Configure User entity
             modelBuilder.Entity<User>(entity =>
