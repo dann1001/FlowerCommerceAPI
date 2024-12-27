@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Product_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Product_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Product_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Product_Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="Product_WaterRequirement" xml:space="preserve">
+    <value>Water Requirement</value>
+  </data>
+  <data name="Product_WaterRequirementDetails" xml:space="preserve">
+    <value>Detailed Water Requirement</value>
+  </data>
+  <data name="Product_WaterRequirementRecommendation" xml:space="preserve">
+    <value>Recommendation for Water</value>
+  </data>
+</root>

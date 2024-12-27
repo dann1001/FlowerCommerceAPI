@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using FlowerCommerceAPI.Models;
 using FlowerCommerceAPI.Services;
 using System.Collections.Generic;
@@ -13,11 +14,13 @@ namespace FlowerCommerceAPI.Controllers
     {
         private readonly IProductService _productService;
         private readonly IWishlistService _wishlistService;
+        private readonly IStringLocalizer<ProductsController> _localizer;
 
-        public ProductsController(IProductService productService, IWishlistService wishlistService)
+        public ProductsController(IProductService productService, IWishlistService wishlistService, IStringLocalizer<ProductsController> localizer)
         {
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
             _wishlistService = wishlistService ?? throw new ArgumentNullException(nameof(wishlistService));
+            _localizer = localizer;
         }
 
         [HttpGet]
@@ -26,7 +29,7 @@ namespace FlowerCommerceAPI.Controllers
             var products = await _productService.GetProductsAsync();
             if (products == null)
             {
-                return NotFound("Products not found.");
+                return NotFound(_localizer["Products_Not_Found"]);
             }
 
             return Ok(products);
@@ -41,6 +44,13 @@ namespace FlowerCommerceAPI.Controllers
                 return NotFound();
             }
 
+            // Example of localized fields
+            var localizedName = _localizer["Product_Name"];
+            var localizedDescription = _localizer["Product_Description"];
+
+            product.Name = localizedName; // You can replace these with actual localized content
+            product.Description = localizedDescription;
+
             return Ok(product);
         }
 
@@ -50,7 +60,7 @@ namespace FlowerCommerceAPI.Controllers
         {
             if (product == null)
             {
-                return BadRequest("Product data is null");
+                return BadRequest(_localizer["Product_Data_Null"]);
             }
 
             var createdProduct = await _productService.CreateProductAsync(product);
@@ -63,7 +73,7 @@ namespace FlowerCommerceAPI.Controllers
         {
             if (!await _productService.UpdateProductAsync(id, product))
             {
-                return BadRequest("Product ID mismatch or product not found");
+                return BadRequest(_localizer["Product_ID_Mismatch"]);
             }
 
             return NoContent();
@@ -75,7 +85,7 @@ namespace FlowerCommerceAPI.Controllers
         {
             if (!await _productService.DeleteProductAsync(id))
             {
-                return NotFound("Product not found");
+                return NotFound(_localizer["Product_Not_Found"]);
             }
 
             return NoContent();
@@ -88,16 +98,16 @@ namespace FlowerCommerceAPI.Controllers
             var userIdClaim = User.FindFirst("Id")?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
             {
-                return Unauthorized("User not authenticated or ID claim missing.");
+                return Unauthorized(_localizer["User_Not_Authenticated"]);
             }
             var userId = int.Parse(userIdClaim);
 
             if (!await _wishlistService.AddToWishlistAsync(userId, productId))
             {
-                return BadRequest("Product already in wishlist or not found.");
+                return BadRequest(_localizer["Product_Already_In_Wishlist"]);
             }
 
-            return Ok("Product added to wishlist.");
+            return Ok(_localizer["Product_Added_To_Wishlist"]);
         }
 
         [Authorize]
@@ -107,16 +117,16 @@ namespace FlowerCommerceAPI.Controllers
             var userIdClaim = User.FindFirst("Id")?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
             {
-                return Unauthorized("User not authenticated or ID claim missing.");
+                return Unauthorized(_localizer["User_Not_Authenticated"]);
             }
             var userId = int.Parse(userIdClaim);
 
             if (!await _wishlistService.RemoveFromWishlistAsync(userId, productId))
             {
-                return BadRequest("Product not in wishlist or not found.");
+                return BadRequest(_localizer["Product_Not_In_Wishlist"]);
             }
 
-            return Ok("Product removed from wishlist");
+            return Ok(_localizer["Product_Removed_From_Wishlist"]);
         }
     }
 }

@@ -8,81 +8,42 @@ namespace FlowerCommerceAPI.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(100)] // Ensure a max length for the name
-        public string NameEn { get; set; } = string.Empty; // English name
-
         [MaxLength(100)]
-        public string? NamePe { get; set; } // Persian name
+        public string Name { get; set; } = string.Empty; // Localized name
 
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive value.")]
-        public decimal? PricePe { get; set; } // Persian price (optional)
+        public decimal Price { get; set; } // Localized price
 
-        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive value.")]
-        public decimal? PriceEn { get; set; } // English price (optional)
-
-        public string? Description { get; set; }
+        public string? Description { get; set; } // Localized description
 
         [Range(0, int.MaxValue, ErrorMessage = "Stock must be a non-negative value.")]
         public int Stock { get; set; }
 
-        public string? ImageUrl { get; set; } // Single property for images
+        public string? ImageUrl { get; set; } // Single property for image URL
 
-        public string? TypePe { get; set; } // Persian type
-
-        public string? TypeEn { get; set; } // English type
-
-        public string? CategoryPe { get; set; } // Persian category
-
-        public string? CategoryEn { get; set; } // English category
-
-        public bool Favorite { get; set; } // Mark as a favorite
+        public string? Type { get; set; } // Localized type
+        public string? Category { get; set; } // Localized category
+        public bool Favorite { get; set; }
 
         public int CategoryId { get; set; } // Foreign key for category
 
         [JsonIgnore]
         public ICollection<WishlistItem> WishlistedBy { get; set; } = new List<WishlistItem>();
 
-        // Maintenance Fields in Persian
-        public decimal? WaterRequirementPe { get; set; } // How much water is needed (in Persian)
-        public decimal? LightRequirementPe { get; set; } // How much light is needed (in Persian)
-        public decimal? TemperatureRequirementPe { get; set; } // Temperature range for care (in Persian)
-        public decimal? SoilRequirementPe { get; set; } // Proper soil type or properties (in Persian)
+        // Maintenance Fields
+        public decimal? WaterRequirement { get; set; }
+        public decimal? LightRequirement { get; set; }
+        public decimal? TemperatureRequirement { get; set; }
+        public decimal? SoilRequirement { get; set; }
 
-        public decimal? WaterRequirementDetailsPe { get; set; } // Detailed water requirement (in Persian)
-        public decimal? LightRequirementDetailsPe { get; set; } // Detailed light requirement (in Persian)
-        public decimal? TemperatureRequirementDetailsPe { get; set; } // Detailed temperature requirement (in Persian)
-        public decimal? SoilRequirementDetailsPe { get; set; } // Detailed soil requirement (in Persian)
+        public decimal? WaterRequirementDetails { get; set; }
+        public decimal? LightRequirementDetails { get; set; }
+        public decimal? TemperatureRequirementDetails { get; set; }
+        public decimal? SoilRequirementDetails { get; set; }
 
-        public string? WaterRequirementRecommendationPe { get; set; } // Recommendation for water requirement (in English)
-        public string? LightRequirementRecommendationPe { get; set; } // Recommendation for light requirement (in English)
-        public string? TemperatureRequirementRecommendationPe { get; set; } // Recommendation for temperature requirement (in English)
-        public string? SoilRequirementRecommendationPe { get; set; } // Recommendation for soil requirement (in English)
-
-
-
-
-        // Maintenance Fields in English
-        public decimal? WaterRequirementEn { get; set; } // How much water is needed (in English)
-        public decimal? LightRequirementEn { get; set; } // How much light is needed (in English)
-        public decimal? TemperatureRequirementEn { get; set; } // Temperature range for care (in English)
-        public decimal? SoilRequirementEn { get; set; } // Proper soil type or properties (in English)
-
-
-        public decimal? WaterRequirementDetailsEn { get; set; } // Detailed water requirement (in English)
-        public decimal? LightRequirementDetailsEn { get; set; } // Detailed light requirement (in English)
-        public decimal? TemperatureRequirementDetailsEn { get; set; } // Detailed temperature requirement (in English)
-        public decimal? SoilRequirementDetailsEn { get; set; } // Detailed soil requirement (in English)
-
-
-        public string? WaterRequirementRecommendationEn { get; set; } // Recommendation for water requirement (in English)
-        public string? LightRequirementRecommendationEn { get; set; } // Recommendation for light requirement (in English)
-        public string? TemperatureRequirementRecommendationEn { get; set; } // Recommendation for temperature requirement (in English)
-        public string? SoilRequirementRecommendationEn { get; set; } // Recommendation for soil requirement (in English)
-
-
-        public Product()
-        {
-            // Any other initialization logic, if necessary
-        }
+        public string? WaterRequirementRecommendation { get; set; }
+        public string? LightRequirementRecommendation { get; set; }
+        public string? TemperatureRequirementRecommendation { get; set; }
+        public string? SoilRequirementRecommendation { get; set; }
     }
 }

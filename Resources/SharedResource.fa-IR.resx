@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Product_Name" xml:space="preserve">
+    <value>نام</value>
+  </data>
+  <data name="Product_Description" xml:space="preserve">
+    <value>توضیحات</value>
+  </data>
+  <data name="Product_Type" xml:space="preserve">
+    <value>نوع</value>
+  </data>
+  <data name="Product_Category" xml:space="preserve">
+    <value>دسته‌بندی</value>
+  </data>
+  <data name="Product_WaterRequirement" xml:space="preserve">
+    <value>نیاز آبی</value>
+  </data>
+  <data name="Product_WaterRequirementDetails" xml:space="preserve">
+    <value>جزئیات نیاز آبی</value>
+  </data>
+  <data name="Product_WaterRequirementRecommendation" xml:space="preserve">
+    <value>توصیه برای نیاز آبی</value>
+  </data>
+</root>
