@@ -11,6 +11,12 @@ namespace FlowerCommerceAPI.Services
         Task<Product> CreateProductAsync(Product product);
         Task<bool> UpdateProductAsync(int id, Product product);
         Task<bool> DeleteProductAsync(int id);
+        public interface IProductService
+        {
+            Task AddProduct(Product product);
+            Task SaveAsync();
+        }
+
     }
 
     public class ProductService : IProductService

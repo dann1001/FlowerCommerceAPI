@@ -5,8 +5,8 @@ using FlowerCommerceAPI.Models;
 using FlowerCommerceAPI.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 using System.Globalization;
-
 
 namespace FlowerCommerceAPI.Controllers
 {
@@ -36,8 +36,6 @@ namespace FlowerCommerceAPI.Controllers
 
             return Ok(products);
         }
-
-
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProduct(int id)
@@ -77,19 +75,41 @@ namespace FlowerCommerceAPI.Controllers
             return Ok(product);
         }
 
-
-
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(Product product)
+        public async Task<ActionResult<Product>> AddProduct([FromBody] CreateProductDto productDto)
         {
-            if (product == null)
+            if (productDto == null)
             {
                 return BadRequest(_localizer["Product_Data_Null"]);
             }
 
-            var createdProduct = await _productService.CreateProductAsync(product);
-            return CreatedAtAction(nameof(GetProduct), new { id = createdProduct.Id }, createdProduct);
+            // Create the main Product
+            var product = new Product
+            {
+                ImageUrl = productDto.ImageUrl,
+                Price = productDto.Price,
+                Stock = productDto.Stock,
+                CategoryId = productDto.CategoryId,
+                Translations = productDto.Translations.Select(t => new ProductTranslation
+                {
+                    Language = t.Language,
+                    Name = t.Name,
+                    Description = t.Description,
+                    Type = t.Type,
+                    Category = t.Category,
+                    WaterRequirementRecommendation = t.WaterRequirementRecommendation,
+                    LightRequirementRecommendation = t.LightRequirementRecommendation,
+                    TemperatureRequirementRecommendation = t.TemperatureRequirementRecommendation,
+                    SoilRequirementRecommendation = t.SoilRequirementRecommendation
+                }).ToList()
+            };
+
+            // Add Product to the database
+            _productService.AddProduct(product);  // Assuming _productService handles the actual database saving.
+            await _productService.SaveAsync();
+
+            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
 
         [Authorize(Roles = "Admin")]
