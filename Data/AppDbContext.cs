@@ -17,47 +17,6 @@ namespace FlowerCommerceAPI.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // // Seed data for Products and Translations
-            // modelBuilder.Entity<Product>().HasData(
-            //     new Product
-            //     {
-            //         Id = 1, // Primary key or auto-generated ID
-            //         CategoryId = 1,
-            //         Translations = new List<ProductTranslation>
-            //         {
-            //             new ProductTranslation
-            //             {
-            //                 Language = "en-US",
-            //                 Name = "Sample Product",
-            //                 Description = "This is a sample product"
-            //             },
-            //             new ProductTranslation
-            //             {
-            //                 Language = "fa-IR",
-            //                 Name = "محصول نمونه",
-            //                 Description = "این یک محصول نمونه است"
-            //             }
-            //         }
-            //     }
-            // );
-
-            // modelBuilder.Entity<ProductTranslation>().HasData(
-            //     new ProductTranslation
-            //     {
-            //         ProductId = 1,
-            //         Language = "en-US",
-            //         Name = "Sample Product",
-            //         Description = "This is a sample product"
-            //     },
-            //     new ProductTranslation
-            //     {
-            //         ProductId = 1,
-            //         Language = "fa-IR",
-            //         Name = "محصول نمونه",
-            //         Description = "این یک محصول نمونه است"
-            //     }
-            // );
-
             // Configure User entity
             modelBuilder.Entity<User>(entity =>
             {
@@ -70,6 +29,21 @@ namespace FlowerCommerceAPI.Data
             {
                 entity.Property(p => p.Name).IsRequired().HasMaxLength(100);
                 entity.Property(p => p.Price).HasColumnType("decimal(18,2)");
+
+                // Configure relationship between Product and ProductTranslations
+                entity.HasMany(p => p.Translations)
+                      .WithOne()
+                      .HasForeignKey(t => t.ProductId);
+            });
+
+            // Configure ProductTranslation entity (assuming this is where you store translations)
+            modelBuilder.Entity<ProductTranslation>(entity =>
+            {
+                entity.Property(t => t.Language).IsRequired().HasMaxLength(10);
+                entity.Property(t => t.Name).IsRequired().HasMaxLength(100);
+                entity.Property(t => t.Description).HasMaxLength(1000);
+
+                // Additional configurations for the ProductTranslation entity can go here if needed
             });
 
             // Configure WishlistItem entity
