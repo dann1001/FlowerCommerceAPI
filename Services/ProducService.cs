@@ -22,17 +22,7 @@ namespace FlowerCommerceAPI.Services
     public class ProductService : IProductService
     {
         private readonly AppDbContext _context;
-
-        public ProductService(AppDbContext context)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-        }
-
-        public async Task<IEnumerable<Product>> GetProductsAsync()
-        {
-            return await _context.Products
-                                 .Include(p => p.WishlistedBy)  // If you need to include the wishlisted items
-                                 .ToListAsync();
+</bool>cv bt890-
         }
 
         public async Task<Product> GetProductByIdAsync(int id)
