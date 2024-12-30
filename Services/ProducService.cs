@@ -11,24 +11,29 @@ namespace FlowerCommerceAPI.Services
         Task<Product> CreateProductAsync(Product product);
         Task<bool> UpdateProductAsync(int id, Product product);
         Task<bool> DeleteProductAsync(int id);
-        public interface IProductService
-        {
-            Task AddProduct(Product product);
-            Task SaveAsync();
-        }
 
+        void AddProduct(Product product);
+        Task SaveAsync();
     }
 
     public class ProductService : IProductService
     {
         private readonly AppDbContext _context;
-</bool>cv bt890-
+
+        public ProductService(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsAsync()
+        {
+            return await _context.Products.ToListAsync();
         }
 
         public async Task<Product> GetProductByIdAsync(int id)
         {
             return await _context.Products
-                                 .Include(p => p.WishlistedBy)
+                                 .Include(p => p.WishlistedBy) // Assuming there's a navigation property `WishlistedBy`.
                                  .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -74,5 +79,16 @@ namespace FlowerCommerceAPI.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public void AddProduct(Product product)
+        {
+            _context.Products.Add(product);
+        }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
+
 }
