@@ -3,9 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using FlowerCommerceAPI.Models;
 using FlowerCommerceAPI.Services;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq;
 using System.Globalization;
 
 namespace FlowerCommerceAPI.Controllers
