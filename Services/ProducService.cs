@@ -34,12 +34,20 @@ namespace FlowerCommerceAPI.Services
         {
             return await _context.Products
                                  .Include(p => p.WishlistedBy) // Assuming there's a navigation property `WishlistedBy`.
+                                 .Include(p => p.Translations)    // Include Translations
                                  .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<Product> CreateProductAsync(Product product)
         {
             _context.Products.Add(product);
+            if (product.Translations != null)
+            {
+                foreach (var translation in product.Translations)
+                {
+                    _context.Entry(translation).State = EntityState.Added;
+                }
+            }
             await _context.SaveChangesAsync();
             return product;
         }
@@ -52,6 +60,17 @@ namespace FlowerCommerceAPI.Services
             }
 
             _context.Entry(product).State = EntityState.Modified;
+            // Handle translations
+            var existingTranslations = _context.ProductTranslations.Where(t => t.ProductId == id);
+            _context.ProductTranslations.RemoveRange(existingTranslations);
+
+            if (product.Translations != null)
+            {
+                foreach (var translation in product.Translations)
+                {
+                    _context.ProductTranslations.Add(translation);
+                }
+            }
             try
             {
                 await _context.SaveChangesAsync();

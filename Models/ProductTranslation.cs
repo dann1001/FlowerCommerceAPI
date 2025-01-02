@@ -1,3 +1,4 @@
+using FlowerCommerceAPI.Models;
 public class ProductTranslation
 {
     public int Id { get; set; }
@@ -11,4 +12,5 @@ public class ProductTranslation
     public string? LightRequirementRecommendation { get; set; }
     public string? TemperatureRequirementRecommendation { get; set; }
     public string? SoilRequirementRecommendation { get; set; }
+    public Product Product { get; set; }
 }

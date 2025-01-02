@@ -9,4 +9,6 @@ public class ProductTranslationDto
     public string? LightRequirementRecommendation { get; set; }
     public string? TemperatureRequirementRecommendation { get; set; }
     public string? SoilRequirementRecommendation { get; set; }
+    public List<CreateProductDto> CreateProductDto { get; set; } = new();
+
 }
